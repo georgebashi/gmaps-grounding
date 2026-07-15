@@ -46,3 +46,24 @@ func TestExtractPayloadEmptySSE(t *testing.T) {
 		t.Error("want error for empty stream")
 	}
 }
+
+func TestParseLatLng(t *testing.T) {
+	ll, ok := parseLatLng("37.7749, -122.4194")
+	if !ok || ll["latitude"] != 37.7749 || ll["longitude"] != -122.4194 {
+		t.Errorf("got %v ok=%v", ll, ok)
+	}
+	for _, bad := range []string{"San Francisco, CA", "1,2,3", "91,0", "0,181", "a,b", "Main St, Springfield"} {
+		if _, ok := parseLatLng(bad); ok {
+			t.Errorf("parseLatLng(%q) unexpectedly ok", bad)
+		}
+	}
+}
+
+func TestLocation(t *testing.T) {
+	if loc := location("35.6,139.7"); loc["latLng"] == nil {
+		t.Errorf("coordinate pair not parsed as latLng: %v", loc)
+	}
+	if loc := location("Eiffel Tower, Paris"); loc["address"] != "Eiffel Tower, Paris" {
+		t.Errorf("address not preserved: %v", loc)
+	}
+}
