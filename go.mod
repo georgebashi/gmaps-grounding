@@ -1,4 +1,4 @@
-module github.com/georgebashi/mapsmcp
+module github.com/georgebashi/gmaps-grounding
 
 go 1.26.3
 

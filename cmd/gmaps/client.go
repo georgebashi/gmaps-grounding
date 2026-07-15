@@ -116,7 +116,7 @@ func (c *client) initialize() error {
 	_, err := c.rpc("initialize", map[string]any{
 		"protocolVersion": "2025-03-26",
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "mapsmcp", "version": version},
+		"clientInfo":      map[string]any{"name": "gmaps", "version": version},
 	})
 	if err != nil {
 		return err

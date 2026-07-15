@@ -1,6 +1,6 @@
-// mapsmcp is a CLI for the Google Maps Grounding Lite MCP server
-// (https://mapstools.googleapis.com/mcp), exposing each server tool as a
-// subcommand: places, weather, route, resolve, url.
+// gmaps is a CLI for the Google Maps Grounding Lite API's MCP
+// server (https://mapstools.googleapis.com/mcp), exposing each server tool
+// as a subcommand: places, weather, route, resolve, url.
 package main
 
 import (
@@ -66,9 +66,14 @@ func output(cmd *cobra.Command, res *toolResult) error {
 
 func newRootCmd() *cobra.Command {
 	root := &cobra.Command{
-		Use:     "mapsmcp",
-		Short:   "Google Maps Grounding Lite from the command line",
-		Long:    "mapsmcp queries the Google Maps Grounding Lite MCP server\n(mapstools.googleapis.com/mcp) for places, weather, and routes.",
+		Use:   "gmaps",
+		Short: "CLI for the Google Maps Grounding Lite API",
+		Long: "gmaps wraps the Google Maps Grounding Lite API — Google's\n" +
+			"geospatial grounding service for AI applications — by talking directly\n" +
+			"to its MCP server (mapstools.googleapis.com/mcp).\n\n" +
+			"It exposes each grounding tool as a subcommand: place search, weather,\n" +
+			"routes, name resolution, and Maps URL resolution.\n\n" +
+			"Docs: https://developers.google.com/maps/ai/grounding-lite",
 		Version: version,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if flagKey == "" {
@@ -97,9 +102,9 @@ func newPlacesCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "places <query>...",
 		Short: "Search for places, businesses, and addresses",
-		Example: `  mapsmcp places coffee near the Ferry Building, SF
-  mapsmcp places ramen --near 35.6595,139.7005 --radius 2000
-  mapsmcp places "Louvre opening hours" --lang fr`,
+		Example: `  gmaps places coffee near the Ferry Building, SF
+  gmaps places ramen --near 35.6595,139.7005 --radius 2000
+  gmaps places "Louvre opening hours" --lang fr`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			req := map[string]any{"text_query": strings.Join(args, " ")}
@@ -146,9 +151,9 @@ func newWeatherCmd() *cobra.Command {
 		Long: "Current weather or forecast for a location.\n\n" +
 			"The location is an address, place name, or \"lat,lng\" pair.\n" +
 			"Forecasts reach 10 days ahead (120 hours for hourly); history reaches 24 hours back.",
-		Example: `  mapsmcp weather San Francisco, CA
-  mapsmcp weather 37.7749,-122.4194 --imperial
-  mapsmcp weather Tokyo --date 2026-07-18 --hour 9`,
+		Example: `  gmaps weather San Francisco, CA
+  gmaps weather 37.7749,-122.4194 --imperial
+  gmaps weather Tokyo --date 2026-07-18 --hour 9`,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			req := map[string]any{"location": location(strings.Join(args, " "))}
@@ -185,8 +190,8 @@ func newRouteCmd() *cobra.Command {
 		Short: "Compute a route between two places",
 		Long: "Compute a route between two places.\n\n" +
 			"Origin and destination are addresses, place names, or \"lat,lng\" pairs.",
-		Example: `  mapsmcp route "Ferry Building, SF" "Golden Gate Bridge"
-  mapsmcp route 37.7749,-122.4194 "Sausalito, CA" --walk`,
+		Example: `  gmaps route "Ferry Building, SF" "Golden Gate Bridge"
+  gmaps route 37.7749,-122.4194 "Sausalito, CA" --walk`,
 		Args: cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			req := map[string]any{
@@ -214,8 +219,8 @@ func newResolveCmd() *cobra.Command {
 		Short: "Resolve place names or addresses to place IDs and coordinates",
 		Long: "Resolve place names or addresses to place IDs and coordinates.\n\n" +
 			"Each argument is one query (quote multi-word names); up to 20 per call.",
-		Example: `  mapsmcp resolve "Eiffel Tower, Paris"
-  mapsmcp resolve "Ferry Building, SF" "Golden Gate Bridge" --region US`,
+		Example: `  gmaps resolve "Eiffel Tower, Paris"
+  gmaps resolve "Ferry Building, SF" "Golden Gate Bridge" --region US`,
 		Args: cobra.RangeArgs(1, 20),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			queries := make([]map[string]any, len(args))
@@ -244,7 +249,7 @@ func newURLCmd() *cobra.Command {
 		Long: "Resolve Google Maps URLs to place details.\n\n" +
 			"Accepts maps.app.goo.gl short links and google.com/maps place URLs\n" +
 			"pointing at a single place; up to 20 per call.",
-		Example: `  mapsmcp url https://maps.app.goo.gl/abc123`,
+		Example: `  gmaps url https://maps.app.goo.gl/abc123`,
 		Args:    cobra.RangeArgs(1, 20),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			res, err := newClient().callTool("resolve_maps_urls", map[string]any{"urls": args})
@@ -258,7 +263,7 @@ func newURLCmd() *cobra.Command {
 
 func main() {
 	if err := newRootCmd().Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "mapsmcp:", err)
+		fmt.Fprintln(os.Stderr, "gmaps:", err)
 		os.Exit(1)
 	}
 }
